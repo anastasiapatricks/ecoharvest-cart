@@ -1,0 +1,11 @@
+services:
+  cart-service:
+    build: .
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_DATA_MONGODB_URI=mongodb://host.docker.internal:27017
+      - SPRING_DATA_MONGODB_USERNAME=
+      - SPRING_DATA_MONGODB_PASSWORD=
+      - SPRING_DATA_MONGODB_DATABASE=cart
+    ports:
+      - 9003:8080
