@@ -1,14 +1,14 @@
 package com.ncs.fresh.cart.model;
 
 import java.util.Arrays;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InputItemCart {
 
+    public String[] productIds;
+    public Integer[] quantities;
 
-    public final String[] productIds;
-    public final Integer[] quantities;
-
-    public InputItemCart(String[] productIds, Integer[] quantities) {
+    public InputItemCart(@JsonProperty("productIds") String[] productIds, @JsonProperty("quantities") Integer[] quantities) {
         this.productIds = productIds;
         this.quantities = quantities;
     }
