@@ -6,7 +6,6 @@ import com.ncs.fresh.cart.model.InputItemCart;
 import com.ncs.fresh.cart.repository.CartItemRepositoryInterface;
 import com.ncs.fresh.cart.service.CartItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ncs.fresh.cart.util.MockCartDataGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeAll;
@@ -86,13 +85,7 @@ class CartItemTest {
     @Test
     public void testCreateNewCart() throws Exception {
         String userId = "123";
-        String[] products = new String[1];
-        products[0] = "123";
-
-        Integer[] quantities = new Integer[1];
-        quantities[0] = 5;
-
-        InputItemCart mockData = new InputItemCart(products, quantities);
+        InputItemCart mockData = new InputItemCart("12,",5);
 
         mockMvc.perform(MockMvcRequestBuilders.post(String.format("/cart/%s", userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -108,13 +101,7 @@ class CartItemTest {
     @Test
     public void testUpdateCart() throws Exception {
         String userId = "123";
-        String[] products = new String[1];
-        products[0] = "123";
-
-        Integer[] quantities = new Integer[1];
-        quantities[0] = 5;
-
-        InputItemCart mockData = new InputItemCart(products, quantities);
+        InputItemCart mockData = new InputItemCart("123", 5);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(String.format("/cart/%s", userId))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -139,13 +126,8 @@ class CartItemTest {
     @Test
     public void testDeleteCartById() throws Exception {
         String userId = "123";
-        String[] products = new String[1];
-        products[0] = "123";
 
-        Integer[] quantities = new Integer[1];
-        quantities[0] = 5;
-
-        InputItemCart mockData = new InputItemCart(products, quantities);
+        InputItemCart mockData = new InputItemCart("123", 5);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(String.format("/cart/%s", userId))
                         .contentType(MediaType.APPLICATION_JSON)

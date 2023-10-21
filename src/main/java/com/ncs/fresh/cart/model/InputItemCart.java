@@ -1,23 +1,28 @@
 package com.ncs.fresh.cart.model;
 
 import java.util.Arrays;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InputItemCart {
 
-    public String[] productIds;
-    public Integer[] quantities;
 
-    public InputItemCart(@JsonProperty("productIds") String[] productIds, @JsonProperty("quantities") Integer[] quantities) {
-        this.productIds = productIds;
-        this.quantities = quantities;
+    public final String productId;
+    public final Integer quantity;
+
+    public InputItemCart() {
+        this.productId = "";
+        this.quantity = 0;
+    }
+
+    public InputItemCart(String productId, Integer quantity) {
+        this.productId = productId;
+        this.quantity = quantity;
     }
 
     @Override
     public String toString() {
         return "InputItemCart{" +
-                ", productIds=" + Arrays.toString(productIds) +
-                ", quantities=" + Arrays.toString(quantities) +
+                ", productId=" + productId +
+                ", quantity=" + quantity +
                 '}';
     }
 }

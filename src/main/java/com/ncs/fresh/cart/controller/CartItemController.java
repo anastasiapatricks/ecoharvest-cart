@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+@CrossOrigin
 @RestController
 public class CartItemController {
     private final CartItemService cartItemService;
@@ -49,9 +50,9 @@ public class CartItemController {
         return ResponseEntity.status(HttpStatus.CREATED).body(this.cartItemService.createCartItem(in, user_id));
     }
 
-    @PutMapping("/cart/{user_id}/{id}")
-    public ResponseEntity<CartItem> updateOneCartById(@PathVariable String user_id, @PathVariable String id, @RequestBody UpdateItemCart update) {
-        var updatedEntity = this.cartItemService.updateCartItemById(user_id, id, update);
+    @PutMapping("/cart/{user_id}")
+    public ResponseEntity<List<CartItem>> updateCartItems(@PathVariable String user_id, @RequestBody List<UpdateItemCart> update) {
+        var updatedEntity = this.cartItemService.updateCartItems(user_id, update);
         return ResponseEntity.status(HttpStatus.OK).body(updatedEntity);
     }
 

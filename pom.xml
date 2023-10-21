@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ncs</groupId>
     <artifactId>cart_service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <name>Cart Service</name>
     <description>Cart Service</description>
     <properties>

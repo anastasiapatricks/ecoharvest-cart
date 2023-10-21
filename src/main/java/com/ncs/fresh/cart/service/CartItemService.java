@@ -1,7 +1,6 @@
 package com.ncs.fresh.cart.service;
 
 import com.ncs.fresh.cart.error.CartNotFindException;
-import com.ncs.fresh.cart.error.CartQuantitiesProductMismatchException;
 import com.ncs.fresh.cart.error.InternalServerErrorException;
 import com.ncs.fresh.cart.model.CartItem;
 import com.ncs.fresh.cart.model.InputItemCart;
@@ -10,8 +9,17 @@ import com.ncs.fresh.cart.repository.CartItemRepositoryInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.BulkOperationException;
+import org.springframework.data.mongodb.core.BulkOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,20 +34,33 @@ public class CartItemService {
         this.repository = repository;
     }
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
 
     public CartItem createCartItem(InputItemCart in, String user_id) {
         log.info("Create New Cart user");
         try {
-            log.debug("Check if the cart has equal amount of products and quantities");
-            if (in.productIds.length != in.quantities.length) {
-                throw new CartQuantitiesProductMismatchException("Cart count mismatch");
+//            Find if there cart with the same product id and user id
+            log.debug("Find Existing Product with user");
+            var res = this.repository.getCartWithProductItem(user_id, in.productId);
+
+            if (res.isPresent()) {
+                log.debug("Existing Product exist, adding the value");
+                var cart = res.get();
+                cart.quantity += in.quantity;
+                this.repository.save(cart);
+                return cart;
+            } else {
+                log.debug("Product not found creating new cart");
+                CartItem cart = new CartItem(in, user_id);
+                log.debug(cart.toString());
+                cart = this.repository.save(cart);
+                System.out.println("hello");
+                log.debug("Saved Cart Successfully with ID: " + cart.cartId);
+                return cart;
             }
-            CartItem cart = new CartItem(in, user_id);
-            log.debug(cart.toString());
-            cart = this.repository.save(cart);
-            System.out.println("hello");
-            log.debug("Saved Cart Successfully with ID: " + cart.cartId);
-            return cart;
+
         } catch (Exception e) {
             log.error("Internal Exception on createCartItem", e);
             throw new InternalServerErrorException("Internal Server Error");
@@ -78,37 +99,39 @@ public class CartItemService {
             return data;
 
         } catch (Exception e) {
-            log.error("Internal Exception on getAllCartItemByUserId", e);
+            log.error("Internal Exception on getAllCartItemByUserId");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
 
-    public CartItem updateCartItemById(String user_id, String cartId, UpdateItemCart update) {
+    public List<CartItem> updateCartItems(String user_id, List<UpdateItemCart> updateCart) {
         log.info("Updating Cart Item");
+        BulkOperations bulkOperations = mongoTemplate.bulkOps(BulkOperations.BulkMode.UNORDERED, CartItem.class);
         try {
-            log.debug(String.format("Updating Cart Item of %s user ID %s", cartId, user_id));
-            log.debug("Retrieving user cart");
-            var cart = this.getCartItemById(user_id, cartId);
-            if (cart.isEmpty()) {
-                log.warn(String.format("Cart not found for of %s user ID %s", cartId, user_id));
-                throw new CartNotFindException("Cart not found");
+            log.debug("Update cart data :" + updateCart.toString());
+            updateCart.forEach(cart -> {
+                Query query = Query.query(Criteria.where("_id").is(cart.cartId));
+                Update update = new Update();
+                update.set("productId", cart.productId);
+                update.set("quantity", cart.quantity);
+                update.set("updatedDate", LocalDateTime.now());
+                bulkOperations.updateOne(query, update);
+            });
+            bulkOperations.execute();
+
+            log.debug("Update complete successfully");
+            log.debug("Retrieve the updated value");
+            Query query = new Query(Criteria.where("userId").is(user_id));
+            List<CartItem> result = mongoTemplate.find(query, CartItem.class);
+            if (result.isEmpty()) {
+                log.debug("Empty result");
+            } else {
+                log.debug("Found Total Cart Item: " + result.size());
             }
-            CartItem c = cart.get();
-            if (update.productIds.length != update.quantities.length) {
-                log.warn("Product quantity and quantity length not same");
-                throw new CartQuantitiesProductMismatchException("Mismatch Product quantity");
-            }
-            c.productIds = update.productIds;
-            c.quantities = update.quantities;
-            c.status = update.status;
-            log.debug("Updating the cart");
-            var updated = this.repository.save(c);
-            log.debug("Cart has been updated");
-            log.debug(updated.toString());
-            return updated;
+            return result;
 
         } catch (Exception e) {
-            log.error("Internal Exception on updateCartItemById", e);
+            log.error("Internal Exception on updateCartItems");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
@@ -125,11 +148,10 @@ public class CartItemService {
             this.repository.delete(cart.get());
             return true;
         } catch (Exception e) {
-            log.error("Internal Exception on deleteByUserAndCartId", e);
+            log.error("Internal Exception on deleteByUserAndCartId");
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
-
 
 
 }

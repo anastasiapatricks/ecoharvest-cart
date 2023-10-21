@@ -16,6 +16,9 @@ public interface CartItemRepositoryInterface extends MongoRepository<CartItem, S
     @Query(value = "{ 'userId' : ?0 }")
     Optional<List<CartItem>> getByUserId(String UserId);
 
+    @Query(value = "{ 'userId' : ?0 , 'productId' : ?1}")
+    Optional<CartItem> getCartWithProductItem(String UserId, String ProductId);
+
     @Query(value = "{ 'userId' : ?0, '_id': ?1 }", delete = true)
     void deleteByUserIdAndProductsId(String UserId, String cartId);
 }
