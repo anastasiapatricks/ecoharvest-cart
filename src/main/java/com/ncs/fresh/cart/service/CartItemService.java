@@ -63,7 +63,7 @@ public class CartItemService {
                 return cartItem;
             }
         } catch (Exception e) {
-            log.error("Internal Exception on createCartItem", e);
+            log.error("Internal Exception on getCartItemById", e);
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
@@ -78,7 +78,7 @@ public class CartItemService {
             return data;
 
         } catch (Exception e) {
-            log.error("Internal Exception on getAllCartItemByUserId");
+            log.error("Internal Exception on getAllCartItemByUserId", e);
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
@@ -108,7 +108,7 @@ public class CartItemService {
             return updated;
 
         } catch (Exception e) {
-            log.error("Internal Exception on getAllCartItemByUserId");
+            log.error("Internal Exception on updateCartItemById", e);
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
@@ -125,7 +125,7 @@ public class CartItemService {
             this.repository.delete(cart.get());
             return true;
         } catch (Exception e) {
-            log.error("Internal Exception on getAllCartItemByUserId");
+            log.error("Internal Exception on deleteByUserAndCartId", e);
             throw new InternalServerErrorException("Internal Server Error");
         }
     }
